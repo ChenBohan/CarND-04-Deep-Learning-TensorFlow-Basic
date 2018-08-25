@@ -43,4 +43,10 @@ Implement ``xW + b`` in the linear function.
 
 ## Cross Entropy
 
-<img src=" " width = "50%" height = "50%" div align=center />
+<img src="https://github.com/ChenBohan/AI-ML-DL-02-Intro-to-TensorFlow/blob/master/readme_img/cross-entropy.png" width = "50%" height = "50%" div align=center />
+
+## SGD
+
+### Momentum
+
+### Learning rate decay
