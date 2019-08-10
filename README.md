@@ -1,71 +1,21 @@
-# AI-Deep-Learning-02-Intro-to-TensorFlow
+# CarND-04-Deep-Learning-TensorFlow-Basic
+
 Udacity Self-Driving Car Engineer Nanodegree: Introduction to TensorFlow
 
-## Linear Function
+## Tensorflow math
 
 ```python
-def get_weights(n_features, n_labels):
-    """
-    Return TensorFlow weights
-    :param n_features: Number of features
-    :param n_labels: Number of labels
-    :return: TensorFlow weights
-    """
-    return tf.Variable(tf.truncated_normal((n_features, n_labels)))
-```
-I'll use the ``tf.truncated_normal()`` function to generate random numbers from a normal distribution.
-The ``tf.truncated_normal()`` function returns a tensor with random values from a normal distribution whose magnitude is no more than 2 standard deviations from the mean. 
+# Convert the following to TensorFlow:
+x = tf.constant(10)
+y = tf.constant(2)
+z = tf.subtract(tf.divide(x,y),tf.cast(tf.constant(1), tf.float64))
 
-```python
-def get_biases(n_labels):
-    """
-    Return TensorFlow bias
-    :param n_labels: Number of labels
-    :return: TensorFlow bias
-    """
-    return tf.Variable(tf.zeros(n_labels))
-```
-Since the weights are already helping prevent the model from getting stuck, you don't need to randomize the bias.
-The ``tf.zeros()`` function returns a tensor with all zeros.
-
-```python
-def linear(input, w, b):
-    """
-    Return linear function in TensorFlow
-    :param input: TensorFlow input
-    :param w: TensorFlow weights
-    :param b: TensorFlow biases
-    :return: TensorFlow linear function
-    """
-    return tf.add(tf.matmul(input, w), b)
-```
-Implement ``xW + b`` in the linear function.
-
-## Cross Entropy
-
-<img src="https://github.com/ChenBohan/AI-ML-DL-02-Intro-to-TensorFlow/blob/master/readme_img/cross-entropy.png" width = "50%" height = "50%" div align=center />
-
-<img src="https://github.com/ChenBohan/AI-ML-DL-02-Intro-to-TensorFlow/blob/master/readme_img/overview.png" width = "50%" height = "50%" div align=center />
-
-<img src="https://github.com/ChenBohan/AI-ML-DL-02-Intro-to-TensorFlow/blob/master/readme_img/loss%20function.png" width = "50%" height = "50%" div align=center />
-
-## SGD
-
-### Mini-batching
-
-The idea is to randomly shuffle the data at the start of each epoch, then create the mini-batches. 
-For each mini-batch, you train the network weights with gradient descent. 
-
-```python
-features = tf.placeholder(tf.float32, [None, n_input])
-labels = tf.placeholder(tf.float32, [None, n_classes])
+with tf.Session() as sess:
+    output = sess.run(z)
+    print(output)
 ```
 
-In that case, the size of the batches would vary, so you need to take advantage of TensorFlow's ``tf.placeholder()`` function to receive the varying batch sizes.
-
-The ``None`` dimension is a ``placeholder`` for the batch size. At runtime, TensorFlow will accept any batch size greater than 0.
-
-Implement the batches function:
+## Mini-batching
 
 ```python
 def batches(batch_size, features, labels):
@@ -77,25 +27,50 @@ def batches(batch_size, features, labels):
     :return: Batches of (Features, Labels)
     """
     assert len(features) == len(labels)
-    # TODO: Implement batching
-    outout_batches = []    
+    outout_batches = []
+    
     sample_size = len(features)
     for start_i in range(0, sample_size, batch_size):
         end_i = start_i + batch_size
         batch = [features[start_i:end_i], labels[start_i:end_i]]
-        outout_batches.append(batch)       
+        outout_batches.append(batch)
+        
     return outout_batches
 ```
 
-Let's use mini-batching to feed batches of MNIST features and labels into a linear model.
+## Main
+
 ```python
+# Features and Labels
+features = tf.placeholder(tf.float32, [None, n_input])
+labels = tf.placeholder(tf.float32, [None, n_classes])
+
+# Weights & bias
+weights = tf.Variable(tf.random_normal([n_input, n_classes]))
+bias = tf.Variable(tf.random_normal([n_classes]))
+
+# Logits - xW + b
+logits = tf.add(tf.matmul(features, weights), bias)
+
+# Define loss and optimizer
+cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=labels))
+optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate).minimize(cost)
+
+# Calculate accuracy
+correct_prediction = tf.equal(tf.argmax(logits, 1), tf.argmax(labels, 1))
+accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+
+batch_size = 128
+
+init = tf.global_variables_initializer()
+
 with tf.Session() as sess:
     sess.run(init)
     
     # TODO: Train optimizer on all batches
     for batch_features, batch_labels in batches(batch_size, train_features, train_labels):
         sess.run(optimizer, feed_dict={features: batch_features, labels: batch_labels})
-        
+
     # Calculate accuracy for test dataset
     test_accuracy = sess.run(
         accuracy,
