@@ -40,6 +40,8 @@ def batches(batch_size, features, labels):
 
 ## Main
 
+<img src="https://github.com/ChenBohan/CarND-04-Deep-Learning-TensorFlow-Basic/blob/master/readme_img/overview.png" width = "50%" height = "50%" div align=center />
+
 ```python
 # Features and Labels
 features = tf.placeholder(tf.float32, [None, n_input])
